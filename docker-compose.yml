@@ -1,0 +1,112 @@
+# ============================================================
+# docker-compose.yml — HoneyTrap
+# Production-ready orchestration with health checks
+# Services: app (Flask) + db (PostgreSQL 16) + redis (Redis 7)
+# ============================================================
+
+services:
+
+  # ── Application Flask ─────────────────────────────────
+  honey-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: honeytrap-app
+    ports:
+      - "5000:5000"
+    env_file: .env
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@honey-db:5432/${POSTGRES_DB}
+      - REDIS_URL=redis://honey-redis:6379/0
+    depends_on:
+      honey-db:
+        condition: service_healthy
+      honey-redis:
+        condition: service_healthy
+    networks:
+      - honeytrap-net
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+      - ./uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "app=honeytrap"
+
+  # ── Base de données PostgreSQL 16 ─────────────────────────────────
+  honey-db:
+    image: postgres:16-alpine
+    container_name: honeytrap-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init_db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - honeytrap-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=100"
+      - "-c"
+      - "shared_buffers=256MB"
+
+  # ── Redis 7 (Rate Limiting cache) ─────────────────────────────────
+  honey-redis:
+    image: redis:7-alpine
+    container_name: honeytrap-redis
+    command: redis-server --save 60 1 --loglevel warning --appendonly yes
+    volumes:
+      - redisdata:/data
+    networks:
+      - honeytrap-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# ── Volumes for data persistence ─────────────────────
+volumes:
+  pgdata:
+    driver: local
+  redisdata:
+    driver: local
+
+# ── Networks ─────────────────────────────────────────
+networks:
+  honeytrap-net:
+    driver: bridge
+    name: honeytrap-net

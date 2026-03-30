@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <title>WordPress › Connexion</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#f0f0f1; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+           display:flex; align-items:center; justify-content:center; min-height:100vh; flex-direction:column; }
+    .wp-logo { text-align:center; margin-bottom:20px; }
+    .wp-logo svg { width:84px; fill:#1d2327; }
+    .wp-login { background:#fff; padding:26px; width:320px; box-shadow:0 1px 3px rgba(0,0,0,.13); }
+    .wp-login h1 { font-size:14px; color:#1d2327; margin-bottom:16px; font-weight:600; }
+    label { display:block; font-size:14px; color:#1d2327; font-weight:600; margin-bottom:4px; margin-top:14px; }
+    input[type=text], input[type=password] {
+      width:100%; padding:6px 10px; border:1px solid #8c8f94; border-radius:4px;
+      font-size:14px; background:#fff; box-shadow:inset 0 1px 2px rgba(0,0,0,.07);
+      outline:none;
+    }
+    input:focus { border-color:#2271b1; box-shadow:0 0 0 1px #2271b1; }
+    .checkbox-row { display:flex; align-items:center; gap:8px; margin-top:16px; font-size:14px; color:#3c434a; }
+    .wp-submit {
+      width:100%; margin-top:20px; background:#2271b1; border:0; color:#fff;
+      font-size:13px; font-weight:600; padding:8px 0; cursor:pointer; border-radius:3px;
+    }
+    .wp-submit:hover { background:#135e96; }
+    .login-links { margin-top:16px; text-align:center; font-size:13px; }
+    .login-links a { color:#2271b1; text-decoration:none; }
+    .error-msg {
+      background:#fcf0f1; border-left:4px solid #d63638; padding:12px 16px;
+      font-size:13px; color:#d63638; margin-top:12px;
+    }
+    .wp-bottom { margin-top:16px; text-align:center; }
+    .wp-bottom a { color:#50575e; font-size:13px; text-decoration:none; }
+    .version-note { color:#a7aaad; font-size:11px; text-align:center; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <div class="wp-logo">
+    <svg viewBox="0 0 122.52 122.523" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8.71,61.26C8.71,33.16,31.15,10.12,58.84,8.82L61.26,8.71c28.1,0,51.15,22.44,52.44,50.13L114.81,61.26c0,28.1-22.44,51.15-50.13,52.44L61.26,114.81C33.16,114.81,8.71,91.85,8.71,61.26Z M61.26,0A61.26,61.26,0,1,0,122.52,61.26,61.26,61.26,0,0,0,61.26,0ZM28.49,61.26A32.77,32.77,0,0,1,61.26,28.49a32.3,32.3,0,0,1,18.08,5.49L36,73.47A32.47,32.47,0,0,1,28.49,61.26Zm32.77,32.77a32.3,32.3,0,0,1-16.35-4.42l22.18-64.37A32.77,32.77,0,0,1,61.26,94Z"/>
+    </svg>
+  </div>
+
+  <div class="wp-login">
+    <h1>WordPress</h1>
+    <form method="POST">
+      <label for="user_login">Identifiant ou adresse e-mail</label>
+      <input type="text" id="user_login" name="log" autocomplete="username" autofocus/>
+
+      <label for="user_pass">Mot de passe</label>
+      <input type="password" id="user_pass" name="pwd" autocomplete="current-password"/>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="rememberme" name="rememberme"/>
+        <label for="rememberme" style="margin:0;font-weight:400">Se souvenir de moi</label>
+      </div>
+
+      <input type="submit" class="wp-submit" value="Se connecter"/>
+    </form>
+
+    {% if error %}
+    <div class="error-msg">{{ error }}</div>
+    {% endif %}
+
+    <div class="login-links">
+      <a href="#">Mot de passe oublié ?</a>
+    </div>
+  </div>
+
+  <div class="wp-bottom">
+    <a href="#">← Retour sur Corp-Website</a>
+  </div>
+  <div class="version-note">WordPress 6.4.3</div>
+</body>
+</html>

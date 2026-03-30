@@ -1,0 +1,256 @@
+# ============================================================
+# Secrets & Environment — CRITICAL: DO NOT COMMIT
+# ============================================================
+.env
+.env.local
+.env.*.local
+.env.production
+.env.staging
+secrets.json
+secrets.txt
+*.pem
+*.key
+*.crt
+credentials.json
+api_keys.json
+
+# ============================================================
+# Python Development
+# ============================================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ============================================================
+# Testing & Code Quality
+# ============================================================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+*.cover
+.hypothesis/
+nosetests.xml
+coverage.xml
+
+# ============================================================
+# IDEs & Editors
+# ============================================================
+.vscode/
+.idea/
+.idea_modules/
+*.sublime-project
+*.sublime-workspace
+.atom/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.history/
+.env.local
+.env.*.local
+.vscode-server/
+*.swp
+*.swo
+*~
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ============================================================
+# Logging & Temporary Files
+# ============================================================
+*.log
+*.pid
+attacks.log
+debug.log
+logs/
+temp/
+tmp/
+*.tmp
+*.bak
+*.backup
+.tmp/
+
+# ============================================================
+# Database & Data
+# ============================================================
+*.db
+*.sqlite
+*.sqlite3
+db.sqlite3
+instance/
+pgdata/
+redisdata/
+
+# ============================================================
+# Docker & Containerization
+# ============================================================
+.docker/
+docker-compose.local.yml
+docker-compose.override.yml
+
+# ============================================================
+# Front-end & Static Files
+# ============================================================
+node_modules/
+package-lock.json
+yarn.lock
+dist/
+.next/
+out/
+.cache/
+static/dist/
+static/js/bundle.*
+static/css/bundle.*
+uploads/
+
+# ============================================================
+# Operating Systems
+# ============================================================
+.DS_Store
+.DS_Store?
+._*
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.directory
+desktop.ini
+*.lnk
+
+# ============================================================
+# IDE Specific
+# ============================================================
+# VS Code
+.vscode/
+.vscode-server/
+vscode-server/
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+*.sublime-session
+
+# Atom
+.atom/
+
+# PyCharm
+.idea/
+*.py.orig
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.AppleDouble
+.LSOverride
+
+# ============================================================
+# Build Artifacts
+# ============================================================
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+.installed.cfg
+*.egg
+
+# ============================================================
+# Backup Files
+# ============================================================
+*.swp
+*.swo
+*~
+.*~
+*.bak
+*.backup
+*.orig
+*.swp
+core
+*.stackdump
+
+# ============================================================
+# Generated Documentation
+# ============================================================
+docs/_build/
+docs/.doctrees/
+site/
+
+# ============================================================
+# Jupyter Notebooks
+# ============================================================
+.ipynb_checkpoints
+*.ipynb_checkpoints
+.jupyter/
+
+# ============================================================
+# Local Development Overrides
+# ============================================================
+.env.local.yml
+docker-compose.local.yml
+webpack.config.local.js
+config.local.py
+
+# ============================================================
+# CI/CD Artifacts
+# ============================================================
+.github/workflows/artifacts/
+.gitlab-ci.yml.local
+.travis.yml.local
+
+# ============================================================
+# Production-like Files (should be .env)
+# ============================================================
+.env.production.local
+.env.staging.local
+production.env
+staging.env
+

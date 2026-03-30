@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <title>SSH Login</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: #0d0d0d;
+      color: #00ff41;
+      font-family: 'Courier New', monospace;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh;
+    }
+    .terminal {
+      width: 620px;
+      background: #111;
+      border: 1px solid #00ff4133;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 0 40px #00ff4122;
+    }
+    .term-bar {
+      background: #1e1e1e;
+      padding: 8px 14px;
+      display: flex; gap: 8px; align-items: center;
+    }
+    .dot { width:12px; height:12px; border-radius:50%; }
+    .dot-r{background:#ff5f56;} .dot-y{background:#ffbd2e;} .dot-g{background:#27c93f;}
+    .term-title { color:#888; font-size:12px; margin-left:auto; }
+    .term-body { padding: 20px; font-size:14px; line-height:1.8; }
+    .prompt { color: #888; }
+    .cmd { color: #fff; }
+    .banner { color: #00ff41; margin-bottom: 16px; font-size: 12px; }
+    .login-form { margin-top: 16px; }
+    .login-form label { display:block; margin-bottom:4px; color:#00ff41; }
+    .login-form input {
+      background: transparent; border: none; border-bottom: 1px solid #00ff4155;
+      color: #00ff41; font-family: inherit; font-size:14px; width:100%;
+      outline: none; padding: 2px 0; margin-bottom:12px;
+    }
+    .login-form input[type=password] { -webkit-text-security: disc; letter-spacing:4px; }
+    .login-form button {
+      background: transparent; border: 1px solid #00ff41;
+      color: #00ff41; font-family: inherit; font-size:14px;
+      padding: 6px 20px; cursor: pointer; margin-top:8px;
+    }
+    .login-form button:hover { background: #00ff4122; }
+    .error { color: #ff4141; margin-top:12px; font-size:13px; }
+    .blink { animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity:0; } }
+  </style>
+</head>
+<body>
+  <div class="terminal">
+    <div class="term-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span class="term-title">bash — ssh root@192.168.1.100</span>
+    </div>
+    <div class="term-body">
+      <pre class="banner">
+  ___  _____ _   _
+ / __||  ___| | | |
+ \__ \| |_  | |_| |
+  ___/|___|  \___/
+      </pre>
+      <div>
+        <span class="prompt">$ </span><span class="cmd">ssh root@192.168.1.100</span>
+      </div>
+      <div style="color:#888; font-size:13px; margin:8px 0;">
+        OpenSSH_9.3p1 Ubuntu-1ubuntu3.6, OpenSSL 3.0.2 15 Mar 2022<br>
+        Warning: Permanently added '192.168.1.100' (ED25519) to the list of known hosts.
+      </div>
+
+      <form class="login-form" method="POST">
+        <label>root@192.168.1.100's password:</label>
+        <input type="password" name="password" autocomplete="off" autofocus/>
+        <button type="submit">↵ Connexion</button>
+      </form>
+
+      {% if error %}
+      <div class="error">{{ error }}</div>
+      {% endif %}
+
+      <div style="margin-top:12px; color:#555; font-size:12px;">
+        <span class="blink">█</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

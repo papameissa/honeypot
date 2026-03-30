@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+
+  <!-- ── STATS CARDS ── -->
+  <section class="stats-grid">
+    <div class="stat-card stat-total">
+      <div class="stat-icon">⚡</div>
+      <div class="stat-body">
+        <span class="stat-value" id="total-attacks">{{ total_attacks }}</span>
+        <span class="stat-label">Attaques totales</span>
+      </div>
+    </div>
+    <div class="stat-card stat-blocked">
+      <div class="stat-icon">🛡</div>
+      <div class="stat-body">
+        <span class="stat-value">{{ total_blocked }}</span>
+        <span class="stat-label">IPs bloquées</span>
+      </div>
+    </div>
+    <div class="stat-card stat-high">
+      <div class="stat-icon">🔴</div>
+      <div class="stat-body">
+        <span class="stat-value">
+          {% set high = namespace(val=0) %}
+          {% for stat in severity_stats %}
+            {% if stat.severity == 'high' %}{% set high.val = stat.count %}{% endif %}
+          {% endfor %}
+          {{ high.val }}
+        </span>
+        <span class="stat-label">Sévérité haute</span>
+      </div>
+    </div>
+    <div class="stat-card stat-services">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-body">
+        <span class="stat-value">4</span>
+        <span class="stat-label">Services leurres actifs</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CHARTS ROW ── -->
+  <section class="charts-row">
+    <div class="chart-card">
+      <h3 class="chart-title">Types d'attaques</h3>
+      <canvas id="typeChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title">Sévérité</h3>
+      <canvas id="severityChart"></canvas>
+    </div>
+    <div class="chart-card chart-wide">
+      <h3 class="chart-title">Top IPs attaquantes</h3>
+      <canvas id="topIpChart"></canvas>
+    </div>
+  </section>
+
+  <!-- ── FAKE SERVICES ── -->
+  <section class="services-grid">
+    <h2 class="section-title">⬡ Services Leurres</h2>
+    <div class="services-row">
+      {% for svc, label, icon in [('ssh','SSH Terminal','🖥'),('ftp','FTP Server','📁'),('admin','WP Admin','⚙'),('phpmyadmin','phpMyAdmin','🗃')] %}
+      <a href="{{ url_for('honeypot.fake_' ~ svc) }}" class="service-card" target="_blank">
+        <span class="svc-icon">{{ icon }}</span>
+        <span class="svc-label">{{ label }}</span>
+        <span class="svc-url">/fake/{{ svc }}</span>
+        <span class="svc-badge">LEURRE</span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ── ATTACK TABLE ── -->
+  <section class="table-section">
+    <div class="table-header">
+      <h2 class="section-title">⬡ Attaques Récentes</h2>
+      <span class="live-badge" id="live-indicator">● LIVE</span>
+    </div>
+    <div class="table-wrapper">
+      <table class="attack-table" id="attack-table">
+        <thead>
+          <tr>
+            <th>#</th><th>IP</th><th>Pays</th><th>Type</th>
+            <th>Service</th><th>Sévérité</th><th>Horodatage</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in recent_attacks %}
+          <tr class="severity-{{ a.severity }}">
+            <td class="td-id">{{ a.id }}</td>
+            <td class="td-ip">{{ a.ip_address }}</td>
+            <td>{{ a.country or '—' }}</td>
+            <td><span class="badge type-{{ a.attack_type }}">{{ a.attack_type }}</span></td>
+            <td>{{ a.target_service }}</td>
+            <td><span class="badge sev-{{ a.severity }}">{{ a.severity }}</span></td>
+            <td class="td-time">{{ a.timestamp.strftime('%Y-%m-%d %H:%M:%S') if a.timestamp else '—' }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7" class="empty-row">Aucune attaque enregistrée — En attente d'intrus...</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── TOP IPs TABLE ── -->
+  <section class="table-section">
+    <h2 class="section-title">⬡ Top Attaquants</h2>
+    <div class="table-wrapper">
+      <table class="attack-table">
+        <thead><tr><th>IP</th><th>Pays</th><th>Attaques</th></tr></thead>
+        <tbody>
+          {% for ip_data in top_ips %}
+          <tr>
+            <td class="td-ip">{{ ip_data.ip_address }}</td>
+            <td>—</td>
+            <td><span class="count-badge">{{ ip_data.count }}</span></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" class="empty-row">Aucune donnée</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+  // Inject server-side data for charts
+  const TYPE_DATA = {{ type_stats | tojson }};
+  const SEV_DATA  = {{ severity_stats | tojson }};
+  initCharts(TYPE_DATA, SEV_DATA);
+</script>
+{% endblock %}

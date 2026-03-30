@@ -1,0 +1,21 @@
+[MASTER]
+init-hook = "import sys; sys.path.append('.')"
+ignore = migrations,tests
+max-line-length = 100
+disable =
+    C0111, # missing-docstring
+    C0103, # invalid-name
+    W0703, # broad-except
+    R0913, # too-many-arguments
+    R0914, # too-many-locals
+    R0915, # too-many-statements
+
+[IMPORTS]
+known-third-party = flask,sqlalchemy,marshmallow
+
+[FORMAT]
+max-line-length = 100
+indent-string = '    '
+
+[LOGGING]
+logging-format-style = new
